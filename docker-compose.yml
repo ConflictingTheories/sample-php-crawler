@@ -1,4 +1,4 @@
-version: '3.5'
+version: '2'
 # Containers
 services:
     # Crawler (PHP)
@@ -9,9 +9,7 @@ services:
         build:
             context: ${BUILD_PATH}/crawler/
         volumes:
-            - type: volume
-              source: website
-              target: /var/www/html
+        - 'website:/var/www/html'
         ports:
         - '4000:80'
         environment:
@@ -24,7 +22,3 @@ volumes:
             type: none
             device: ${BUILD_PATH}/crawler/src
             o: bind
-# Network to Communicate
-networks:
-    default:
-        name: crawler-network
