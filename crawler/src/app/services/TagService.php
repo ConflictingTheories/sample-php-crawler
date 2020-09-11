@@ -13,11 +13,22 @@
 ** ------------------------------------------ **
 \*                                            */
 
-# List of Services to be Injected
-return [
-    \ChaosCrawler\Services\DispatcherService::class,
-    \ChaosCrawler\Services\ViewService::class,
-    \ChaosCrawler\Services\URLService::class,
-    \ChaosCrawler\Services\TagService::class,
-    \ChaosCrawler\Services\HelperService::class,
-];
+namespace ChaosCrawler\Services;
+
+use Phalcon\DiInterface;
+use Phalcon\Di\ServiceProviderInterface;
+use Phalcon\Tag;
+
+class TagService implements ServiceProviderInterface
+{
+    public function register(DiInterface $di)
+    {
+        $di->setShared(
+            'tag',
+            function () {
+                $tag = new Tag();
+                return $tag;
+            }
+        );
+    }
+}

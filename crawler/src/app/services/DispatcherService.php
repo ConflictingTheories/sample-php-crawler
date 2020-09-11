@@ -26,6 +26,7 @@ class DispatcherService implements ServiceProviderInterface
         $di->setShared(
             'dispatcher',
             function () {
+                # Dispatch to Routes (via Namespace)
                 $dispatcher = new Dispatcher();
                 $dispatcher->setDefaultNamespace(
                     'ChaosCrawler\Routes'

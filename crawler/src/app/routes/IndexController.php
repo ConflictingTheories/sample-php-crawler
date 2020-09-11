@@ -35,21 +35,22 @@ class IndexController extends Controller
     private $titleLen = 0;
 
     # GET / (Default)
-    public function indexAction($site = "agencyanalytics.com", $count = 5, $depth = 0, $first = true)
+    public function indexAction($site = "agencyanalytics.com", $count = 5, $depth = 0)
     {
-        $this->crawlAction($site, $count, $depth, $first);
+        $this->crawlAction($site, $count, $depth);
     }
 
     # GET /crawl/:site/:count/:depth
-    public function crawlAction($site = "agencyanalytics.com", $count = 5, $depth = 0, $first = true)
+    public function crawlAction($site = "agencyanalytics.com", $count = 5, $depth = 0)
     {
         try {
             # Set Base URL (assumes HTTP -- Curl will Follow if Redirected to HTTPS)
             $this->baseUrl = 'http://' . $site;
 
             # Crawl
-            $output = $this->crawlSite($this->baseUrl, $count, $depth, $first);
-
+            $output = $this->crawlSite($this->baseUrl, $count, $depth, true);
+            echo $this->tag->getDocType(5);
+            echo '<html>';
             # Response
             echo '<div class="alert alert-primary" role="alert">';
             echo '# of Sites Crawled: <strong>' . sizeof($this->visitedLinks) . '</strong><br/>';
@@ -58,6 +59,7 @@ class IndexController extends Controller
             echo 'Average Title Length: <strong>' . $this->titleLen / sizeof($this->visitedLinks) . ' words</strong>';
             echo '</div>';
             echo $output;
+            echo '</html>';
         } catch (\Exception $e) {
             echo "Something went wrong";
         }
