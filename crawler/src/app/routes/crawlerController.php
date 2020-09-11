@@ -26,8 +26,14 @@ class CrawlerController extends Controller
 
     # Link Cache
     private $visitedLinks = [];
+    # Initial URL
     private $baseUrl = '';
+    # Total Load Time
     private $load = 0;
+    # Total Word Count
+    private $wc = 0;
+    # Total Title Lenght
+    private $titleLen = 0;
 
     # GET /crawler/index/:site/:count/:depth
     public function indexAction($site = "www.google.ca", $count = 0, $depth = 0, $first = true)
@@ -35,18 +41,26 @@ class CrawlerController extends Controller
         try {
             # Set Base URL (assumes HTTPS)
             $this->baseUrl = 'https://' . $site;
-            
+
             # Crawl
             $output = $this->crawl($this->baseUrl, $count, $depth, $first);
-            
-            # Response
-            echo "<h2>Sites Crawled: " . sizeof($this->visitedLinks) . "</h2>";
-            echo "<h2>Average Load Time: " . $this->load / sizeof($this->visitedLinks) . " seconds </h2>";
-            echo $output;
 
+            # Response
+            echo '<div class="alert alert-primary" role="alert">';
+            echo '# of Sites Crawled: <strong>' . sizeof($this->visitedLinks).'</strong><br/>';
+            echo 'Average Load Time: <strong>' . $this->load / sizeof($this->visitedLinks) . ' seconds</strong><br/>';
+            echo 'Average Word Count: <strong>' . $this->wc / sizeof($this->visitedLinks) . ' words</strong><br/>';
+            echo 'Average Title Length: <strong>' . $this->titleLen / sizeof($this->visitedLinks) . ' words</strong>';
+            echo '</div>';
+
+            echo $output;
         } catch (\Exception $e) {
             echo "Something went wrong";
         }
+    }
+
+    protected function displayAverages()
+    {
     }
 
     # Crawl Website - Url, Crawl Links Count - Depth to Follow Links, Initial Load
@@ -78,7 +92,12 @@ class CrawlerController extends Controller
 
                 # Render Output Table
                 $result[] = $this->view->render('results', ['output' => $output, 'status' => $page['status'], 'load' => $page['load']]);
+                # Load Averages
                 $this->load += $page['load'];
+                # Word Count Averages
+                $this->wc += $output['wordcount'];
+                # Title Length
+                $this->titleLen += strlen($dom->getElementsByTagName('title')[0]->textContent);
 
                 # Crawl # of Links (Internal)
                 $lCount = $count;
