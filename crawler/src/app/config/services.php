@@ -18,4 +18,5 @@ return [
     \ChaosCrawler\Services\DispatcherService::class,
     \ChaosCrawler\Services\ViewService::class,
     \ChaosCrawler\Services\URLService::class,
+    \ChaosCrawler\Services\HelperService::class,
 ];
