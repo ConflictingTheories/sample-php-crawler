@@ -26,86 +26,124 @@ class CrawlerController extends Controller
 
     # Link Cache
     private $visitedLinks = [];
+    private $baseUrl = '';
+    private $load = 0;
 
     # GET /crawler/index/:site/:count/:depth
-    public function indexAction($site = "https://www.google.ca", $count = 0, $depth = 0, $first = true)
+    public function indexAction($site = "www.google.ca", $count = 0, $depth = 0, $first = true)
     {
-        $output = [
-            'site' => $site,
-            'checksum' => crc32($site),
-            'wordcount' => 0,
-            'a' => [],
-            'img' => [],
-            'link' => [],
-        ];
+        try {
+            # Set Base URL (assumes HTTPS)
+            $this->baseUrl = 'https://' . $site;
+            
+            # Crawl
+            $output = $this->crawl($this->baseUrl, $count, $depth, $first);
+            
+            # Response
+            echo "<h2>Sites Crawled: " . sizeof($this->visitedLinks) . "</h2>";
+            echo "<h2>Average Load Time: " . $this->load / sizeof($this->visitedLinks) . " seconds </h2>";
+            echo $output;
 
-        $html5 = new HTML5();
-        $page = $this->fetch($site, $site);
-
-        if ($page['status'] == 200) {
-
-            # Load HTML
-            $dom = $html5->loadHTML($page['data']);
-            $this->crawlPage($output, $dom);
-
-            # Render Header Section (only first level)
-            if ($first)
-                echo $this->view->render('header');
-
-            # Render Sites
-            echo $this->view->render('results', ['output' => $output]);
-
-            // Crawl # more of Links from Base
-            $lCount = $count;
-
-            // Output all if set to 0 links
-            if ($lCount == 0) $lCount = sizeof($output['a']);
-            while (--$lCount > 0 && sizeof($output['a']) > 0) {
-                $url = array_pop($output['a'])['src'];
-                if ($depth >= 0) {
-                    $newDepth = $depth - 1;
-                    $this->indexAction($url, $count, $newDepth, false);
-                }
-            }
+        } catch (\Exception $e) {
+            echo "Something went wrong";
         }
     }
 
-    # Store in Cache
-    protected function storeLink($url,$site)
+    # Crawl Website - Url, Crawl Links Count - Depth to Follow Links, Initial Load
+    protected function crawl($site, $count, $depth, $first)
     {
-        $this->visitedLinks[] = $this->formatURL($url,$site);
+        $result = [];
+        try {
+            $output = [
+                'site' => $site,
+                'checksum' => crc32($site),
+                'wordcount' => 0,
+                'internal' => [],
+                'external' => [],
+                'img' => [],
+            ];
+
+            $html5 = new HTML5();
+            $page = $this->fetch($site);
+
+            if ($page['status']) {
+
+                # Load HTML
+                $dom = $html5->loadHTML($page['data']);
+                $this->crawlPage($output, $dom);
+
+                # Render Header Section (only first level)
+                if ($first)
+                    $result[] = $this->view->render('header');
+
+                # Render Output Table
+                $result[] = $this->view->render('results', ['output' => $output, 'status' => $page['status'], 'load' => $page['load']]);
+                $this->load += $page['load'];
+
+                # Crawl # of Links (Internal)
+                $lCount = $count;
+                if ($lCount == 0) $lCount = sizeof($output['internal']); # OR (all if set to 0)
+                while (--$lCount > 0 && sizeof($output['internal']) > 0) {
+                    $url = array_pop($output['internal'])['src'];
+                    $this->consoleLog($url);
+                    if ($this->checkLink($url)) {
+                        if ($depth >= 0) {
+                            $newDepth = $depth - 1;
+                            $result[] = $this->crawl($url, $count, $newDepth, false);
+                        }
+                    } else
+                        $lCount++;
+                }
+            }
+        } catch (\Exception $e) {
+            echo "Something went wrong";
+        }
+        return join("", $result);
+    }
+
+    # Log to Browser (JS Console)
+    protected function consoleLog($url)
+    {
+        echo '<script>console.log("' . $url . '");</script>';
+    }
+
+    # Store in Cache
+    protected function storeLink($url)
+    {
+        $this->visitedLinks[] = $this->formatURL($url, $url);
     }
 
     # Check Against Cache
-    protected function checkLink($url,$site)
+    protected function checkLink($url)
     {
-        return !in_array($this->formatURL($url,$site), $this->visitedLinks);
+        return !in_array($this->formatURL($url, $url), $this->visitedLinks);
     }
 
     # Fetch Link
-    protected function fetch($url, $site)
+    protected function fetch($url)
     {
-        if ($this->checkLink($url,$site)) {
+        if ($this->checkLink($url)) {
             $cHandler = curl_init($url);
-
+            # Options
             curl_setopt($cHandler, CURLOPT_USERAGENT, 'ChaosCrawler - v1.0.0 - Web Crawler');
-            curl_setopt($cHandler, CURLOPT_REFERER, $site);
+            curl_setopt($cHandler, CURLOPT_REFERER, $url);
             curl_setopt($cHandler, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($cHandler, CURLOPT_RETURNTRANSFER, true);
-
+            # Fetch Page
             $webdata = curl_exec($cHandler);
             $status =  curl_getinfo($cHandler, CURLINFO_HTTP_CODE);
-
+            $load = curl_getinfo($cHandler, CURLINFO_TOTAL_TIME);
+            # Close & Store Link in Cache
             curl_close($cHandler);
-            $this->storeLink($url,$site);
-
-            return ['data' => mb_convert_encoding($webdata, 'HTML-ENTITIES', "UTF-8"), 'status' => $status];
+            $this->storeLink($url);
+            # Return
+            return ['data' => mb_convert_encoding($webdata, 'HTML-ENTITIES', "UTF-8"), 'status' => $status, 'load' => $load];
         } else {
             return ['data' => null, 'status' => 500];
         }
     }
 
-    # Format (For Relative Links)
+    # Format URL to Fully Qualified
     protected function formatURL($url, $site)
     {
         if (strpos($url, '//'))
@@ -115,24 +153,56 @@ class CrawlerController extends Controller
                 $nUrl = parse_url($site);
             else
                 $nUrl = parse_url('https://' . $site);
-            if (strpos($url, '/') == 0)
-                return $nUrl['scheme'] . '://' . $nUrl['host'] . $url;
-            else
+            if (strpos($url, '/') == 0) {
+                if ($url == '/') {
+                    return $nUrl['scheme'] . '://' . $nUrl['host'];
+                } else {
+                    return $nUrl['scheme'] . '://' . $nUrl['host'] . $url;
+                }
+            } else
                 return $nUrl['scheme'] . '://' . $nUrl['host'] . $nUrl['path'] . $url;
         }
     }
 
+    # Internal vs External Links
+    protected function isInternal($url = '')
+    {
+        // Abort if parameter URL is empty
+        if (empty($url)) {
+            return false;
+        }
+        $link_url = parse_url($url);
+        $home_url = parse_url($this->baseUrl);
+
+        if (empty($link_url['host'])) {
+            $class = true;
+        } elseif ($link_url['host'] == $home_url['host']) {
+            $class = true;
+        } else {
+            $class = false;
+        }
+        return $class;
+    }
+
+
     # Parse Tags of Interest
     protected function parseTag(&$output, $tag)
     {
-        // Parse various Types of Tags
         switch ($tag->tagName) {
                 # Anchor Tags
             case 'a':
-                $chksum = crc32($tag->getAttribute('href'));
-                if (!in_array($chksum, array_keys($output['a']))) {
-                    $output['a'][$chksum] = [
-                        'src' => $this->formatURL($tag->getAttribute('href'), $output['site']),
+
+                $url = $tag->getAttribute('href');
+                $chksum = crc32($this->formatURL($url, $output['site']));
+                if (!in_array($chksum, array_keys($output['internal'])) && !in_array($chksum, array_keys($output['external'])) && $this->isInternal($url)) {
+                    $output['internal'][$chksum] = [
+                        'src' => $this->formatURL($url, $output['site']),
+                        'label' => $tag->textContent,
+                        'checksum' => $chksum
+                    ];
+                } elseif (!in_array($chksum, array_keys($output['internal'])) && !in_array($chksum, array_keys($output['external']))) {
+                    $output['external'][$chksum] = [
+                        'src' => $this->formatURL($url, $output['site']),
                         'label' => $tag->textContent,
                         'checksum' => $chksum
                     ];
@@ -140,29 +210,27 @@ class CrawlerController extends Controller
                 break;
                 # Image Tags
             case 'img':
-                $chksum = crc32($tag->getAttribute('src'));
+                $url = $tag->getAttribute('src');
+                $chksum = crc32($this->formatURL($url, $output['site']));
                 if (!in_array($chksum, array_keys($output['img'])))
                     $output['img'][$chksum] = [
-                        'src' => $this->formatURL($tag->getAttribute('src'), $output['site']),
+                        'src' => $this->formatURL($url, $output['site']),
                         'label' => $tag->getAttribute('alt'),
                         'checksum' => $chksum
                     ];
                 break;
         }
-        // Count Words Regardless (TODO -- CHECK THIS ISNT RECOUNTING)
         $output['wordcount'] += sizeof(explode(' ', $tag->textContent));
     }
 
-    // Recursively Print DOM Tags
+    // Crawl Page DOM Tree
     protected function crawlPage(&$output, $dom)
     {
         if (is_null($dom->childNodes)) {
             return;
         } else
             foreach ($dom->childNodes as $item) {
-                # Parse Content
                 $this->parseTag($output, $item);
-                # Crawl Child Nodes
                 $this->crawlPage($output, $item);
             }
     }

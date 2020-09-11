@@ -2,16 +2,17 @@
     <div class="container">
         <nav class="navbar navbar-light bg-light">
             <strong>
-                <a class="navbar-brand" href="#demo-<?= $output['checksum'] ?>" data-toggle="collapse"><?= $output['site'] . ': - links: ' . sizeof($output['a']) . ' - imgs: ' . sizeof($output['img']) . ' - Word Count: ' . $output['wordcount'] ?></a>
+                <a class="navbar-brand" href="#demo-<?= $output['checksum'] ?>" data-toggle="collapse">
+                    <h2><?='status: '.$status.' :: <strong>'.$output['site'].'</strong>('.$load.' seconds)' ?></h2>
+                </a>
             </strong>
         </nav>
         <div id="demo-<?= $output['checksum'] ?>" class="collapse">
-            <hr>
-            <h1><?= $output['site'] ?></h1>
+            <hr/>
             <nav class="navbar navbar-light bg-light">
-                <a class="navbar-brand" href="#demo-link-<?= $output['checksum'] ?>" data-toggle="collapse">Links (<?= sizeof($output['a']) ?> Found)</a>
+                <a class="navbar-brand" href="#demo-link-<?= $output['checksum'] ?>" data-toggle="collapse">External Links (<?= sizeof($output['external']) ?> Found)</a>
             </nav>
-            <table id="demo-link-<?= $output['checksum'] ?>" class="collapse">
+            <table class="table collapse" id="demo-link-<?= $output['checksum'] ?>">
                 <thead>
                     <tr>
                     </tr>
@@ -24,7 +25,34 @@
                 </thead>
                 <tbody>
                     <?php $i = 0;
-                    foreach ($output['a'] as $a) { ?>
+                    foreach ($output['external'] as $a) { ?>
+                        <tr>
+                            <td><?= $i ?></td>
+                            <td><?= $a['checksum'] ?></td>
+                            <td><a href="<?= $a['src'] ?>"><?= $a['src'] ?></a></td>
+                            <td><?= $a['label'] ?></td>
+                        </tr>
+                    <?php $i++;
+                    } ?>
+                </tbody>
+            </table>
+            <nav class="navbar navbar-light bg-light">
+                <a class="navbar-brand" href="#demo-link-int-<?= $output['checksum'] ?>" data-toggle="collapse">Internal Links (<?= sizeof($output['internal']) ?> Found)</a>
+            </nav>
+            <table class="table collapse"  id="demo-link-int-<?= $output['checksum'] ?>">
+                <thead>
+                    <tr>
+                    </tr>
+                    <tr>
+                        <th>#</th>
+                        <th>checksum</th>
+                        <th>href</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php $i = 0;
+                    foreach ($output['internal'] as $a) { ?>
                         <tr>
                             <td><?= $i ?></td>
                             <td><?= $a['checksum'] ?></td>
@@ -40,13 +68,13 @@
                     Images (<?= sizeof($output['img']) ?> Found)
                 </a>
             </nav>
-            <table id="demo-img-<?= $output['checksum'] ?>" class="collapse">
+            <table class="table collapse" id="demo-img-<?= $output['checksum'] ?>">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>checksum</th>
+                        <th>Checksum</th>
                         <th>Thumbnail</th>
-                        <th>SRC</th>
+                        <th>Src</th>
                         <th>Alt</th>
                     </tr>
                 </thead>
@@ -57,7 +85,7 @@
                             <td><?= $i ?></td>
                             <td><?= $img['checksum'] ?></td>
                             <td><img src="<?= $img['src'] ?>" height="64" width="64"></td>
-                            <td><?= $img['src'] ?></td>
+                            <td><a href="<?= $img['src'] ?>"><?= $img['src'] ?></a></td>
                             <td><?= $img['label'] ?></td>
                         </tr>
                     <?php $i++;
@@ -66,5 +94,5 @@
             </table>
         </div>
     </div>
-    <hr/>
+    <hr />
 </body>
