@@ -1,0 +1,70 @@
+<body>
+    <div class="container">
+        <nav class="navbar navbar-light bg-light">
+            <strong>
+                <a class="navbar-brand" href="#demo-<?= $output['checksum'] ?>" data-toggle="collapse"><?= $output['site'] . ': - links: ' . sizeof($output['a']) . ' - imgs: ' . sizeof($output['img']) . ' - Word Count: ' . $output['wordcount'] ?></a>
+            </strong>
+        </nav>
+        <div id="demo-<?= $output['checksum'] ?>" class="collapse">
+            <hr>
+            <h1><?= $output['site'] ?></h1>
+            <nav class="navbar navbar-light bg-light">
+                <a class="navbar-brand" href="#demo-link-<?= $output['checksum'] ?>" data-toggle="collapse">Links (<?= sizeof($output['a']) ?> Found)</a>
+            </nav>
+            <table id="demo-link-<?= $output['checksum'] ?>" class="collapse">
+                <thead>
+                    <tr>
+                    </tr>
+                    <tr>
+                        <th>#</th>
+                        <th>checksum</th>
+                        <th>href</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php $i = 0;
+                    foreach ($output['a'] as $a) { ?>
+                        <tr>
+                            <td><?= $i ?></td>
+                            <td><?= $a['checksum'] ?></td>
+                            <td><a href="<?= $a['src'] ?>"><?= $a['src'] ?></a></td>
+                            <td><?= $a['label'] ?></td>
+                        </tr>
+                    <?php $i++;
+                    } ?>
+                </tbody>
+            </table>
+            <nav class="navbar navbar-light bg-light">
+                <a class="navbar-brand" href="#demo-img-<?= $output['checksum'] ?>" data-toggle="collapse">
+                    Images (<?= sizeof($output['img']) ?> Found)
+                </a>
+            </nav>
+            <table id="demo-img-<?= $output['checksum'] ?>" class="collapse">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>checksum</th>
+                        <th>Thumbnail</th>
+                        <th>SRC</th>
+                        <th>Alt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php $i = 0;
+                    foreach ($output['img'] as $img) { ?>
+                        <tr>
+                            <td><?= $i ?></td>
+                            <td><?= $img['checksum'] ?></td>
+                            <td><img src="<?= $img['src'] ?>" height="64" width="64"></td>
+                            <td><?= $img['src'] ?></td>
+                            <td><?= $img['label'] ?></td>
+                        </tr>
+                    <?php $i++;
+                    } ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <hr/>
+</body>

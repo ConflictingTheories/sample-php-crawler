@@ -1,1 +1,7 @@
+# Env variables
 .env
+
+# Composer / PHP Libraries
+**/composer.lock
+**/composer.phar
+**/vendor

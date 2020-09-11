@@ -12,61 +12,52 @@
 **           All Rights Reserved.             **
 ** ------------------------------------------ **
 \*                                            */
+namespace ChaosCrawler;
 
 use Phalcon\Loader;
-use Phalcon\Url;
 use Phalcon\Di\FactoryDefault;
-use Phalcon\Mvc\View;
 use Phalcon\Mvc\Application;
 
 # Paths
 define('BASE_PATH', dirname(__DIR__));
 define('APP_PATH', BASE_PATH . '/app');
 
-print_r(APP_PATH);
-# Autoloads Classes from Folders
-$loader = new Loader();
-$loader->registerDirs(
-    [
-        APP_PATH . '/controllers/',
-        APP_PATH . '/models/',
-    ]
-);
+// print_r(BASE_PATH."/vendor/autoload.php");
 
-$loader->register();
+require BASE_PATH . "/vendor/autoload.php";
 
-# App Container
-$container = new FactoryDefault();
-# Set View Folder
-$container->set(
-    'view',
-    function () {
-        $view = new View();
-        $view->setViewsDir(APP_PATH . '/views/');
-        return $view;
-    }
-);
-# Set Base URL
-$container->set(
-    'url',
-    function () {
-        $url = new Url();
-        $url->setBaseUri('/');
-        return $url;
-    }
-);
-
-$application = new Application($container);
 
 try {
-    // Handle the request
-    // $response = $application->handle(
-    //     $_SERVER["REQUEST_URI"]
-    // );
-    echo $application->handle($_GET['_url'] ?? '/')->getContent();
 
+    # Autoloads Classes from Folders
+    $loader = new Loader();
+    $loader->registerNamespaces(
+        [
+            'ChaosCrawler\Services' => APP_PATH . '/services/',
+            'ChaosCrawler\Models' => APP_PATH . '/models/',
+            'ChaosCrawler\Routes' => APP_PATH . '/routes/',
+        ]
+    );
+    $loader->register();
 
-    // $response->send();
+    # App Container
+    $container = new FactoryDefault();
+
+    # Inject Services
+    $services = include_once APP_PATH . '/config/services.php';
+    foreach ($services as $service) {
+        $container->register(new $service());
+    }
+
+    # Start App
+    $application = new Application($container);
+    $application->useImplicitView(false); // For Simple Views
+
+    # Handle Response
+    $response = $application->handle($_SERVER["REQUEST_URI"]);
+    $response->send();
+
 } catch (\Exception $e) {
+
     echo 'Exception: ', $e->getMessage();
 }

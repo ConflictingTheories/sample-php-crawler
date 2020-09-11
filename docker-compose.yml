@@ -1,4 +1,5 @@
 version: '3.5'
+# Containers
 services:
     # Database 
     mysql_db:
@@ -21,9 +22,11 @@ services:
         image: crawler:latest
         restart: always
         build:
-            context: ./crawler/
+            context: ${BUILD_PATH}/crawler/
         volumes:
-            - './crawler/src:/var/www/html'
+            - type: volume
+              source: website
+              target: /var/www/html
         depends_on: 
             - 'mysql_db'
         ports:
@@ -33,7 +36,15 @@ services:
             DB_HOST: mysql_db
             DB_USER: ${MYSQL_USER}
             DB_PASS: ${MYSQL_PASSWORD}
-            DB_NAME: ${MYSQL_DATABASE}
+            DB_NAME: ${MYSQL_DATABASE}   
+# Volumes
+volumes:
+    website:
+        driver: local
+        driver_opts:
+            type: none
+            device: ${BUILD_PATH}/crawler/src
+            o: bind
 # Network to Communicate
 networks:
     default:

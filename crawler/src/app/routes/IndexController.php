@@ -14,13 +14,17 @@
 **              IndexController               **
 ** ------------------------------------------ **
 \*                                            */
+namespace ChaosCrawler\Routes;
 
 use Phalcon\Mvc\Controller;
 
-class TestController extends Controller
+class IndexController extends Controller
 {
     public function indexAction()
     {
-        return '<h1>Bonjour!</h1>';
+        echo '<h1>Enter the site you would like to crawl!</h1>';
+        echo '<form>';
+        echo '<input type='
     }
+
 }

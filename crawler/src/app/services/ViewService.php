@@ -11,16 +11,25 @@
 **                                            **
 **           All Rights Reserved.             **
 ** ------------------------------------------ **
-**              IndexController               **
-** ------------------------------------------ **
 \*                                            */
 
-use Phalcon\Mvc\Controller;
+namespace ChaosCrawler\Services;
 
-class IndexController extends Controller
+use Phalcon\DiInterface;
+use Phalcon\Di\ServiceProviderInterface;
+use Phalcon\Mvc\View\Simple;
+
+class ViewService implements ServiceProviderInterface
 {
-    public function indexAction()
+    public function register(DiInterface $di)
     {
-        return '<h1>Hello!</h1>';
+        $di->setShared(
+            'view',
+            function () {
+                $view = new Simple(); // Simple Views
+                $view->setViewsDir(APP_PATH . '/views/');
+                return $view;
+            }
+        );
     }
 }
