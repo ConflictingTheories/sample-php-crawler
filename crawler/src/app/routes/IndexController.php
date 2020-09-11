@@ -17,7 +17,6 @@
 
 namespace ChaosCrawler\Routes;
 
-use Exception;
 use Phalcon\Mvc\Controller;
 use Masterminds\HTML5;
 
@@ -44,32 +43,36 @@ class IndexController extends Controller
     public function crawlAction($site = "agencyanalytics.com", $count = 5, $depth = 0)
     {
         try {
-            # Set Base URL (assumes HTTP -- Curl will Follow if Redirected to HTTPS)
-            $this->baseUrl = 'http://' . $site;
-
             # Crawl
-            $output = $this->crawlSite($this->baseUrl, $count, $depth, true);
-            echo $this->tag->getDocType(5);
-            echo '<html>';
+            $this->baseUrl = 'https://' . $site;
+            $output = $this->crawlSite($this->baseUrl, $count, $depth);
+
             # Response
-            echo '<div class="alert alert-primary" role="alert">';
-            echo '# of Sites Crawled: <strong>' . sizeof($this->visitedLinks) . '</strong><br/>';
-            echo 'Average Load Time: <strong>' . $this->load / sizeof($this->visitedLinks) . ' seconds</strong><br/>';
-            echo 'Average Word Count: <strong>' . $this->wc / sizeof($this->visitedLinks) . ' words</strong><br/>';
-            echo 'Average Title Length: <strong>' . $this->titleLen / sizeof($this->visitedLinks) . ' words</strong>';
-            echo '</div>';
-            echo $output;
-            echo '</html>';
+            echo join('', [
+                $this->tag->getDocType(5),
+                '<html>',
+                $this->view->render('header', ['crawlSite' => $site]),
+                '<body>',
+                '<div class="alert alert-primary" role="alert">',
+                '# of Sites Crawled: <strong>' . sizeof($this->visitedLinks) . '</strong><br/>',
+                'Average Load Time: <strong>' . $this->load / sizeof($this->visitedLinks) . ' seconds</strong><br/>',
+                'Average Word Count: <strong>' . $this->wc / sizeof($this->visitedLinks) . ' words</strong><br/>',
+                'Average Title Length: <strong>' . $this->titleLen / sizeof($this->visitedLinks) . ' words</strong>',
+                '</div>',
+                $output,
+                '</body>',
+                '</html>'
+            ]);
         } catch (\Exception $e) {
             echo "Something went wrong";
         }
     }
 
     # Crawl Website - Url, Crawl Links Count - Depth to Follow Links, Initial Load
-    protected function crawlSite($site, $count, $depth, $first)
+    protected function crawlSite($site, $count, $depth)
     {
-        $result = [];
         try {
+            $result = [];
             $output = [
                 'site' => $site,
                 'checksum' => crc32($site),
@@ -90,26 +93,17 @@ class IndexController extends Controller
                 $html5 = new HTML5();
                 $dom = $html5->loadHTML($page['data']);
                 $this->combDOM($output, $dom);
-
-                # Render Header Section (only first level)
-                if ($first)
-                    $result[] = $this->view->render('header', ['crawlSite' => $site]);
-
-                # Render Output Table
+                # Render Site Crawl Results Table
                 $result[] = $this->view->render('results', ['output' => $output, 'status' => $page['status'], 'load' => $page['load']]);
-                # Load Averages
+                # Averages
                 $this->load += $page['load'];
-                # Word Count Averages
                 $this->wc += $output['wordcount'];
-                # Title Length
                 $this->titleLen += strlen($dom->getElementsByTagName('title')[0]->textContent);
-
-                # Crawl # of Links (Internal)
+                # Crawl up to X (breadth) # of Links - Pass on Depth (if appl.) (Note: ** only Internal for this Demo)
                 $lCount = $count;
                 if ($lCount == 0) $lCount = sizeof($output['internal']); # OR (all if set to 0)
                 while (--$lCount > 0 && sizeof($output['internal']) > 0) {
                     $url = array_pop($output['internal'])['src'];
-                    $this->helper->consoleLog($url);
                     if ($this->checkLink($url)) {
                         if ($depth >= 0) {
                             $newDepth = $depth - 1;
@@ -162,6 +156,7 @@ class IndexController extends Controller
                     ];
                 break;
         }
+        # Word Count
         $output['wordcount'] += sizeof(explode(' ', $tag->textContent));
     }
 

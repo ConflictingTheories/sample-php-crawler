@@ -1,98 +1,111 @@
-<body>
     <div class="container">
+        <!-- SITE HEADER - & STATUS / LOAD TIME -->
         <nav class="navbar navbar-light bg-light">
             <strong>
                 <a class="navbar-brand" href="#demo-<?= $output['checksum'] ?>" data-toggle="collapse">
-                    <h2><?= 'status: ' . $status . ' :: <strong>' . $output['site'] . '</strong>(' . $load . ' seconds)' ?></h2>
+                    <h3><?= 'status: ' . ($status == 200 ? '<span style="color:green;">'.$status.'</span>' : '<span  style="color:red;">'.$status.'</span>') . ' :: <strong>' . $output['site'] . '</strong> <span style="color:darkgrey" >(' . $load . ' seconds)</span>' ?></h3> 
                 </a>
             </strong>
         </nav>
+        <!-- SITE DETAILS -->
         <div id="demo-<?= $output['checksum'] ?>" class="collapse">
             <hr />
+            <!-- Word Count -->
             <nav class="navbar navbar-light bg-light">
-                <a class="navbar-brand" href="#demo-link-<?= $output['checksum'] ?>" data-toggle="collapse">External Links (<?= sizeof($output['external']) ?> Found)</a>
+                <a class="navbar-brand" >Word Count (<?= $output['wordcount'] ?> Words)</a>
             </nav>
-            <table class="table collapse" id="demo-link-<?= $output['checksum'] ?>">
-                <thead>
-                    <tr>
-                    </tr>
-                    <tr>
-                        <th>#</th>
-                        <th>checksum</th>
-                        <th>href</th>
-                        <th>Label</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $i = 0;
-                    foreach ($output['external'] as $a) { ?>
-                        <tr>
-                            <td><?= $i ?></td>
-                            <td><?= $a['checksum'] ?></td>
-                            <td><a href="<?= $a['src'] ?>"><?= $a['src'] ?></a></td>
-                            <td><?= $a['label'] ?></td>
-                        </tr>
-                    <?php $i++;
-                    } ?>
-                </tbody>
-            </table>
+            <!-- Unique Internal Links -->
             <nav class="navbar navbar-light bg-light">
-                <a class="navbar-brand" href="#demo-link-int-<?= $output['checksum'] ?>" data-toggle="collapse">Internal Links (<?= sizeof($output['internal']) ?> Found)</a>
+                <a class="navbar-brand" href="#demo-link-<?= $output['checksum'] ?>" data-toggle="collapse">External Links (<?= sizeof($output['external']) ?> Found) <small>(Click to Expand)</small></a>
             </nav>
-            <table class="table collapse" id="demo-link-int-<?= $output['checksum'] ?>">
-                <thead>
-                    <tr>
-                    </tr>
-                    <tr>
-                        <th>#</th>
-                        <th>checksum</th>
-                        <th>href</th>
-                        <th>Label</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $i = 0;
-                    foreach ($output['internal'] as $a) { ?>
+            <div class="collapse" id="demo-link-<?= $output['checksum'] ?>">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td><?= $i ?></td>
-                            <td><?= $a['checksum'] ?></td>
-                            <td><a href="<?=$a['src']?>"><?= $a['src'] ?></a></td>
-                            <td><?= $a['label'] ?></td>
                         </tr>
-                    <?php $i++;
-                    } ?>
-                </tbody>
-            </table>
+                        <tr>
+                            <th>#</th>
+                            <th>checksum</th>
+                            <th>href</th>
+                            <th>Label</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $i = 0;
+                        foreach ($output['external'] as $a) { ?>
+                            <tr>
+                                <td><?= $i ?></td>
+                                <td><?= $a['checksum'] ?></td>
+                                <td><a href="<?= $a['src'] ?>"><?= $a['src'] ?></a></td>
+                                <td><?= $a['label'] ?></td>
+                            </tr>
+                        <?php $i++;
+                        } ?>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Unique External Links -->
+            <nav class="navbar navbar-light bg-light">
+                <a class="navbar-brand" href="#demo-link-int-<?= $output['checksum'] ?>" data-toggle="collapse">Internal Links (<?= sizeof($output['internal']) ?> Found) <small>(Click to Expand)</small></a>
+            </nav>
+            <div class="collapse" id="demo-link-int-<?= $output['checksum'] ?>">
+                <table class="table">
+                    <thead>
+                        <tr>
+                        </tr>
+                        <tr>
+                            <th>#</th>
+                            <th>checksum</th>
+                            <th>href</th>
+                            <th>Label</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $i = 0;
+                        foreach ($output['internal'] as $a) { ?>
+                            <tr>
+                                <td><?= $i ?></td>
+                                <td><?= $a['checksum'] ?></td>
+                                <td><a href="<?= $a['src'] ?>"><?= $a['src'] ?></a></td>
+                                <td><?= $a['label'] ?></td>
+                            </tr>
+                        <?php $i++;
+                        } ?>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Unique Images -->
             <nav class="navbar navbar-light bg-light">
                 <a class="navbar-brand" href="#demo-img-<?= $output['checksum'] ?>" data-toggle="collapse">
-                    Images (<?= sizeof($output['img']) ?> Found)
+                    Images (<?= sizeof($output['img']) ?> Found) <small>(Click to Expand)</small>
                 </a>
             </nav>
-            <table class="table collapse" id="demo-img-<?= $output['checksum'] ?>">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Checksum</th>
-                        <th>Thumbnail</th>
-                        <th>Src</th>
-                        <th>Alt</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $i = 0;
-                    foreach ($output['img'] as $img) { ?>
+            <div class="collapse" id="demo-img-<?= $output['checksum'] ?>">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td><?= $i ?></td>
-                            <td><?= $img['checksum'] ?></td>
-                            <td><img src="<?= $img['src'] ?>" height="64" width="64"></td>
-                            <td><a href="<?= $img['src'] ?>"><?= $img['src'] ?></a></td>
-                            <td><?= $img['label'] ?></td>
+                            <th>#</th>
+                            <th>Checksum</th>
+                            <th>Thumbnail</th>
+                            <th>Src</th>
+                            <th>Alt</th>
                         </tr>
-                    <?php $i++;
-                    } ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php $i = 0;
+                        foreach ($output['img'] as $img) { ?>
+                            <tr>
+                                <td><?= $i ?></td>
+                                <td><?= $img['checksum'] ?></td>
+                                <td><img src="<?= $img['src'] ?>" height="64" width="64"></td>
+                                <td><a href="<?= $img['src'] ?>"><?= $img['src'] ?></a></td>
+                                <td><?= $img['label'] ?></td>
+                            </tr>
+                        <?php $i++;
+                        } ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <hr />
-</body>
