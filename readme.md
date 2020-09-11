@@ -10,7 +10,6 @@ This is a sample web crawler application designed to crawl a website, and index 
 > All builds and external libraries are generated within the Docker images. This is done for maximum portability, but at the expense of IDE support. Because of this, external PHP libraries (such as composer / phalcon) will not be contained within this build and will not be accessible to an IDE unless installed and made available somewhere else.
 
 # Usage
-Setup `.env` with your configurations (see `.env-sample` for variables required)
 
 ### Windows Powershell
 Run the following to get started (assumes dependencies & `.env` installed):
