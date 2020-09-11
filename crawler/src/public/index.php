@@ -22,10 +22,8 @@ use Phalcon\Mvc\Application;
 define('BASE_PATH', dirname(__DIR__));
 define('APP_PATH', BASE_PATH . '/app');
 
-// print_r(BASE_PATH."/vendor/autoload.php");
-
+# Composer
 require BASE_PATH . "/vendor/autoload.php";
-
 
 try {
 

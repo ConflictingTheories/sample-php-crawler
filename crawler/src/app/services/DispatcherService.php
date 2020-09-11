@@ -30,7 +30,6 @@ class DispatcherService implements ServiceProviderInterface
                 $dispatcher->setDefaultNamespace(
                     'ChaosCrawler\Routes'
                 );
-
                 return $dispatcher;
             }
         );
