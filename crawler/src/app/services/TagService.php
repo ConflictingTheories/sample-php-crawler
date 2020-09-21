@@ -21,11 +21,11 @@ use Phalcon\Tag;
 
 class TagService implements ServiceProviderInterface
 {
-    public function register(DiInterface $di)
+    public function register(DiInterface $di) : void
     {
         $di->setShared(
             'tag',
-            function () {
+            function (): Tag {
                 $tag = new Tag();
                 return $tag;
             }

@@ -21,11 +21,11 @@ use Phalcon\Mvc\View\Simple;
 
 class ViewService implements ServiceProviderInterface
 {
-    public function register(DiInterface $di)
+    public function register(DiInterface $di): void
     {
         $di->setShared(
             'view',
-            function () {
+            function (): Simple {
                 $view = new Simple(); // Simple Views
                 $view->setViewsDir(APP_PATH . '/views/');
                 return $view;

@@ -21,11 +21,11 @@ use Phalcon\Mvc\Dispatcher;
 
 class DispatcherService implements ServiceProviderInterface
 {
-    public function register(DiInterface $di)
+    public function register(DiInterface $di): void
     {
         $di->setShared(
             'dispatcher',
-            function () {
+            function (): Dispatcher {
                 # Dispatch to Routes (via Namespace)
                 $dispatcher = new Dispatcher();
                 $dispatcher->setDefaultNamespace(

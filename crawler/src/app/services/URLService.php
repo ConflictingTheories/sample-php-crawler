@@ -21,11 +21,11 @@ use Phalcon\Mvc\View;
 
 class URLService implements ServiceProviderInterface
 {
-    public function register(DiInterface $di)
+    public function register(DiInterface $di) : void
     {
         $di->setShared(
             'url',
-            function () {
+            function (): Url {
                 $url = new Url();
                 $url->setBaseUri('/');
                 return $url;

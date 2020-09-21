@@ -3,7 +3,7 @@
         <nav class="navbar navbar-light bg-light">
             <strong>
                 <a class="navbar-brand" href="#demo-<?= $output['checksum'] ?>" data-toggle="collapse">
-                    <h3><?= 'status: ' . ($status == 200 ? '<span style="color:green;">'.$status.'</span>' : '<span  style="color:red;">'.$status.'</span>') . ' :: <strong>' . $output['site'] . '</strong> <span style="color:darkgrey" >(' . $load . ' seconds)</span>' ?></h3> 
+                    <h3><?= 'status: ' . ($status == 200 ? '<span style="color:green;">' . $status . '</span>' : '<span  style="color:red;">' . $status . '</span>') . ' :: <strong>' . $output['site'] . '</strong> <span style="color:darkgrey" >(' . $load . ' seconds)</span>' ?></h3>
                 </a>
             </strong>
         </nav>
@@ -12,7 +12,7 @@
             <hr />
             <!-- Word Count -->
             <nav class="navbar navbar-light bg-light">
-                <a class="navbar-brand" >Word Count (<?= $output['wordcount'] ?> Words)</a>
+                <a class="navbar-brand">Word Count (<?= $output['wordcount'] ?> Words)</a>
             </nav>
             <!-- Unique Internal Links -->
             <nav class="navbar navbar-light bg-light">

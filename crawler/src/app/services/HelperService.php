@@ -21,11 +21,11 @@ use Phalcon\Mvc\Dispatcher;
 
 class HelperService implements ServiceProviderInterface
 {
-    public function register(DiInterface $di)
+    public function register(DiInterface $di): void
     {
         $di->setShared(
             'helper',
-            function () {
+            function (): Helper {
                 $helper = new Helper();
                 return $helper;
             }
@@ -33,10 +33,24 @@ class HelperService implements ServiceProviderInterface
     }
 }
 
+class FetchResponse
+{
+    public $data;
+    public $status;
+    public $load;
+
+    public function __construct(string $data, int $status, float $load)
+    {
+        $this->data = $data;
+        $this->status = $status;
+        $this->load = $load;
+    }
+}
+
 class Helper
 {
 
-    public function fetch($url)
+    public function fetch(string $url): FetchResponse
     {
         $cHandler = curl_init($url);
         # Options
@@ -51,11 +65,12 @@ class Helper
         # Close & Store Link in Cache
         curl_close($cHandler);
         # Return
-        return ['data' => mb_convert_encoding($webdata, 'HTML-ENTITIES', "UTF-8"), 'status' => $status, 'load' => $load];
+
+        return new FetchResponse(mb_convert_encoding($webdata, 'HTML-ENTITIES', "UTF-8"), $status, $load);
     }
 
     # Format URL provided with Url (possibly /path) & Site
-    public function formatURL($url, $site)
+    public function formatURL(string $url, string $site): string
     {
         if (strpos($url, '//'))
             return $url;
@@ -76,7 +91,7 @@ class Helper
     }
 
     # Internal Link vs External Link Check
-    public function isInternal($url = '', $baseUrl)
+    public function isInternal(string $url = '', string $baseUrl): bool
     {
         // Abort if parameter URL is empty
         if (empty($url)) {
@@ -96,7 +111,7 @@ class Helper
     }
 
     # Console Log via Script Tag to Browser (on Load)
-    public function consoleLog($input)
+    public function consoleLog(string $input): void
     {
         echo '<script>console.log("' . $input . '");</script>';
     }

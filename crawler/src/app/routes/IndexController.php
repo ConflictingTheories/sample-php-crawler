@@ -34,13 +34,13 @@ class IndexController extends Controller
     private $titleLen = 0;
 
     # GET / (Default)
-    public function indexAction($site = "agencyanalytics.com", $count = 5, $depth = 0)
+    public function indexAction(string $site = "agencyanalytics.com", int $count = 5, int $depth = 0): void
     {
         $this->crawlAction($site, $count, $depth);
     }
 
     # GET /crawl/:site/:count/:depth
-    public function crawlAction($site = "agencyanalytics.com", $count = 5, $depth = 0)
+    public function crawlAction(string $site = "agencyanalytics.com", int $count = 5, int $depth = 0): void
     {
         try {
             # Crawl
@@ -70,7 +70,7 @@ class IndexController extends Controller
     }
 
     # Crawl Website - Url, Crawl Links Count - Depth to Follow Links, Initial Load
-    protected function crawlSite($site, $count, $depth)
+    protected function crawlSite(string $site, int $count, int $depth): string
     {
         try {
             $result = [];
@@ -92,19 +92,19 @@ class IndexController extends Controller
             if ($page) {
                 # Load HTML
                 $html5 = new HTML5();
-                $dom = $html5->loadHTML($page['data']);
+                $dom = $html5->loadHTML($page->data);
                 $this->combDOM($output, $dom);
                 # Render Site Crawl Results Table
-                $result[] = $this->view->render('results', ['output' => $output, 'status' => $page['status'], 'load' => $page['load']]);
+                $result[] = $this->view->render('results', ['output' => $output, 'status' => $page->status, 'load' => $page->load]);
                 # Averages
-                $this->load += $page['load'];
+                $this->load += $page->load;
                 $this->wc += $output['wordcount'];
                 $this->titleLen += strlen($dom->getElementsByTagName('title')[0]->textContent);
                 # Crawl up to X (breadth) # of Links - Pass on Depth (if appl.) (Note: ** only Internal for this Demo)
                 $lCount = $count;
                 if ($lCount == 0) $lCount = sizeof($output['internal']); # OR (all if set to 0)
                 while (--$lCount > 0 && sizeof($output['internal']) > 0) {
-                    $url = array_pop($output['internal'])['src'];
+                    $url = (string) array_pop($output['internal'])['src'];
                     if ($this->checkLink($url)) {
                         if ($depth >= 0) {
                             $newDepth = $depth - 1;
@@ -121,7 +121,7 @@ class IndexController extends Controller
     }
 
     # Parse Tags of Interest
-    protected function parseTag(&$output, $tag)
+    protected function parseTag(array &$output, object $tag): void
     {
         switch ($tag->tagName) {
                 # Anchor Tags
@@ -162,7 +162,7 @@ class IndexController extends Controller
     }
 
     // Crawl Page DOM Tree
-    protected function combDOM(&$output, $dom)
+    protected function combDOM(array &$output, object $dom): void
     {
         if (is_null($dom->childNodes)) {
             return;
@@ -174,13 +174,13 @@ class IndexController extends Controller
     }
 
     # Store in Cache
-    protected function storeLink($url)
+    protected function storeLink(string $url): void
     {
         $this->visitedLinks[] = $this->helper->formatURL($url, $url);
     }
 
     # Check Against Cache
-    protected function checkLink($url)
+    protected function checkLink(string $url): bool
     {
         return !in_array($this->helper->formatURL($url, $url), $this->visitedLinks);
     }

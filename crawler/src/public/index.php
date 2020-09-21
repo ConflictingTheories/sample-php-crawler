@@ -12,6 +12,7 @@
 **           All Rights Reserved.             **
 ** ------------------------------------------ **
 \*                                            */
+
 namespace ChaosCrawler;
 
 use Phalcon\Loader;
@@ -54,7 +55,6 @@ try {
     # Handle Response
     $response = $application->handle($_SERVER["REQUEST_URI"]);
     $response->send();
-
 } catch (\Exception $e) {
 
     echo 'Exception: ', $e->getMessage();
